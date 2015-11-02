@@ -1,18 +1,18 @@
-FROM ubuntu:14.04
+FROM debian:7
 
 RUN apt-get update && apt-get dist-upgrade -y
 
 RUN apt-get install -y gcc g++ git make flex bison gperf ruby perl python
 
-RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty multiverse" >> /etc/apt/sources.list
-RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty multiverse" >> /etc/apt/sources.list
-RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty-updates multiverse" >> /etc/apt/sources.list
-RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty-updates multiverse" >> /etc/apt/sources.list
+# RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty multiverse" >> /etc/apt/sources.list
+# RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty multiverse" >> /etc/apt/sources.list
+# RUN echo "deb http://archive.ubuntu.com/ubuntu/ trusty-updates multiverse" >> /etc/apt/sources.list
+# RUN echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty-updates multiverse" >> /etc/apt/sources.list
+RUN echo "deb http://httpredir.debian.org/debian wheezy main contrib non-free" >> /etc/apt/sources.list
 RUN echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections
 
 RUN apt-get update
-RUN apt-get install -y ttf-dejavu-core ttf-indic-fonts ttf-kochi-gothic \
-                      ttf-kochi-mincho ttf-mscorefonts-installer xfonts-mathml
+RUN apt-get install -y ttf-dejavu-core ttf-indic-fonts ttf-kochi-gothic ttf-kochi-mincho ttf-mscorefonts-installer xfonts-mathml
 
 # For Ubuntu shared libs
 RUN apt-get install -y make gcc g++ nasm curl tar bzip2
@@ -56,7 +56,7 @@ RUN curl -sL http://downloads.webmproject.org/releases/webp/libwebp-${LIBWEBP_VE
 RUN cd libwebp-${LIBWEBP_VER} && ./configure --prefix=/usr --enable-static --disable-shared && make all -j${NUM_CORES} && make install
 
 # OpenSSL
-ENV OPENSSL_VER=1.0.2a
+ENV OPENSSL_VER=1.0.2d
 RUN curl -sL http://openssl.org/source/openssl-${OPENSSL_VER}.tar.gz | tar -xz
 RUN cd openssl-${OPENSSL_VER} && ./config --prefix=/usr --openssldir=/etc/ssl --libdir=lib && make all && make install
 
@@ -72,20 +72,22 @@ ENV LIBXSLT_VER=1.1.28
 RUN curl -sL ftp://xmlsoft.org/libxml2/libxslt-${LIBXSLT_VER}.tar.gz | tar -xz
 RUN cd libxslt-${LIBXSLT_VER} && ./configure --prefix=/usr --enable-static --disable-shared && make all -j${NUM_CORES} && make install
 
+RUN apt-get install -y libfreetype6
 # Freetype
-ENV FREETYPE_VER=2.5.5
-RUN curl -sL http://sourceforge.net/projects/freetype/files/freetype2/${FREETYPE_VER}/freetype-${FREETYPE_VER}.tar.bz2/download | tar -xj
-RUN cd freetype-${FREETYPE_VER} && ./configure --prefix=/usr --enable-static --disable-shared && make all -j${NUM_CORES} && make install
+# ENV FREETYPE_VER=2.5.5
+# RUN curl -sL http://sourceforge.net/projects/freetype/files/freetype2/${FREETYPE_VER}/freetype-${FREETYPE_VER}.tar.bz2/download | tar -xj
+# RUN cd freetype-${FREETYPE_VER} && ./configure --prefix=/usr --enable-static --disable-shared && make all -j${NUM_CORES} && make install
 
 # expat
 #ENV EXPAT_VER=2.1.0
 #RUN curl -sL http://sourceforge.net/projects/expat/files/expat/${EXPAT_VER}/expat-${EXPAT_VER}.tar.gz/download | tar -xz
 #RUN cd expat-${EXPAT_VER} && ./configure --prefix=/usr --enable-static --disable-shared && make all -j${NUM_CORES} && make install
 
+RUN apt-get install -y libfontconfig1-dev
 # Fontconfig
-ENV FONTCONFIG_VER=2.11.1
-RUN curl -sL http://www.freedesktop.org/software/fontconfig/release/fontconfig-${FONTCONFIG_VER}.tar.gz | tar -xz
-RUN cd fontconfig-${FONTCONFIG_VER} && ./configure --prefix=/usr --enable-static --disable-shared --enable-libxml2 && make all -j${NUM_CORES} && make install
+# ENV FONTCONFIG_VER=2.11.1
+# RUN curl -sL http://www.freedesktop.org/software/fontconfig/release/fontconfig-${FONTCONFIG_VER}.tar.gz | tar -xz
+# RUN cd fontconfig-${FONTCONFIG_VER} && ./configure --prefix=/usr --enable-static --disable-shared --enable-libxml2 && make all -j${NUM_CORES} && make install
 
 # libicu
 ENV ICU_VER=55.1
@@ -98,5 +100,5 @@ RUN apt-get install -y git
 #RUN git clone https://github.com/ariya/phantomjs.git
 RUN git clone https://github.com/bprodoehl/phantomjs.git
 
-CMD cd phantomjs && git checkout ${PHANTOMJS_TAG} && ./build.sh --confirm && cp bin/phantomjs /output/.
+RUN cd phantomjs && git checkout ${PHANTOMJS_TAG} && ./build.sh --confirm
 
